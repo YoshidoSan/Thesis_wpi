@@ -19,6 +19,7 @@
 #include <string>
 #include <ros/ros.h>
 #include <ros/console.h>
+#include <utils.h>
 #include <ccm_tracking_controller/CCMTarget.h>
 #include <CCM/ccmcontroller.h>
 #include <CCM/ccmutils.h>
@@ -46,15 +47,24 @@ namespace ccmtracking{
 			double FZ_EST_N_;
 			double FZ_CTRL_N_;
 			bool verbose_;
+
 			// CCM
+			//std::shared_ptr<CCMController> ctrl_;
 			CCMController ctrl_;
+
+			//recevied data
 			ccm_tracking_controller::CCMTarget target_;
+			Eigen::Vector3d position_recevied_conv_;
+			Eigen::Vector3d velocity_recevied_conv_;
+			Eigen::Vector3d acceleration_recevied_conv_;
+			Eigen::Vector3d jerk_recevied_conv;
 			bool firstTargetReceived_ = false;
 			bool targetReceived_ = false;
 			bool poseReceived_ = false;
 			bool velReceived_ = false;
 			geometry_msgs::PoseStamped pose_;
 			geometry_msgs::TwistStamped vel_;
+
 			// Measured states
             Eigen::Vector4d mea_q_;
             Eigen::Matrix3d mea_R_;
@@ -86,14 +96,14 @@ namespace ccmtracking{
 		
 		public:
 			CCMtrackingController(const ros::NodeHandle& nh);
-			void initParam();
+			void initParamModules();
 			void registerPub();
 			void registerCallback();
 
 			// callback functions
 			void poseCB(const geometry_msgs::PoseStamped::ConstPtr& msg);
 			void velCB(const geometry_msgs::TwistStamped::ConstPtr& msg);
-			void targetCB(const ccm_tracking_controller::TargetConstPtr& target);
+			void targetCB(const ccm_tracking_controller::CCMTargetConstPtr& target);
 			void cmdCB(const ros::TimerEvent&);
 			void visCB(const ros::TimerEvent&);
 

@@ -8,12 +8,12 @@
 
 namespace ccmtracking{
 	CCMtrackingController::CCMtrackingController(const ros::NodeHandle& nh) : nh_(nh){
-		this->initParam();
+		this->initParamModules();
 		this->registerPub();
 		this->registerCallback();
 	}
 
-	void CCMtrackingController::initParam(){
+	void CCMtrackingController::initParamModules(){
 		
 		// Define controller classes
 		if (not this->nh_.getParam("controller/FZ_EST_N", this->FZ_EST_N_)){
@@ -31,7 +31,10 @@ namespace ccmtracking{
 		else{
 			cout << "[CCMtrackingController]: FZ_EST_N is set to: " << this->FZ_CTRL_N_  << endl;
 		}
+		//double N = this->FZ_CTRL_N_;
+		//this->ctrl_ = (new CCMController (N));
 		ctrl_(this->FZ_CTRL_N_);
+
 
 		// init param
 		this->Rz_T_ =
@@ -164,8 +167,15 @@ namespace ccmtracking{
 		this->vel_up_ = 1;
 	}
 
-	void CCMtrackingController::targetCB(const ccm_tracking_controller::TargetConstPtr& target){
+	void CCMtrackingController::targetCB(const ccm_tracking_controller::CCMTargetConstPtr& target){
 		this->target_ = *target;
+
+		// convert to eigen
+		this->position_recevied_conv_= Eigen::Vector3d(this->target_.position.x, this->target_.position.y, this->target_.position.z);;
+		this->velocity_recevied_conv_= Eigen::Vector3d(this->target_.velocity.x, this->target_.velocity.y, this->target_.velocity.z);;
+		this->acceleration_recevied_conv_= Eigen::Vector3d(this->target_.acceleration.x, this->target_.acceleration.y, this->target_.acceleration.z);;
+		this->jerk_recevied_conv= Eigen::Vector3d(this->target_.jerk.x, this->target_.jerk.y, this->target_.jerk.z);;
+
 		this->firstTargetReceived_ = true;
 		this->targetReceived_ = true;
 	}
@@ -175,10 +185,10 @@ namespace ccmtracking{
 		Eigen::Vector4d cmd;
 
 		// update controller
-		this->ctrl_.updateState(this->mea_pos_, this->mea_R_, this->mea_vel_, this->mea_wb_, this->fz_est_, this->dt_, this->pose_up_, this->vel_up_);
+		this->ctrl_.updateState(this->mea_pos_, this->mea_R_, this->mea_vel_, this->mea_wb_, this->fz_est_, this->target_.dt, this->pose_up_, this->vel_up_);
 
 		// calculate ccm
-		this->ctrl_.calcCCM(this->target_.yaw, this->target_.yaw_dot, this->target_.position, this->target_.velocity, this->target_.acceleration, this->target_.jerk);
+		this->ctrl_.calcCCM(this->target_.yaw, this->target_.yaw_dot, this->position_recevied_conv_, this->velocity_recevied_conv_, this->acceleration_recevied_conv_, this->jerk_recevied_conv);
 
 		// get commands
 		Eigen::Vector3d ref_er(0,0,0);
@@ -205,7 +215,6 @@ namespace ccmtracking{
 		this->publishTargetHistTraj();
 		this->publishVelAndAccVis();
 	}
-
 
 	void CCMtrackingController::publishCommand(const Eigen::Vector4d& cmd){
 		mavros_msgs::AttitudeTarget cmdMsg;
@@ -265,7 +274,7 @@ namespace ccmtracking{
 		ps.pose.position.x = this->target_.position.x;
 		ps.pose.position.y = this->target_.position.y;
 		ps.pose.position.z = this->target_.position.z;
-		ps.pose.orientation = controller::quaternion_from_rpy(0, 0, this->target_.yaw);
+		ps.pose.orientation = ccmtracking::quaternion_from_rpy(0, 0, this->target_.yaw);
 		if (this->targetHistTraj_.size() <= 100){
 			this->targetHistTraj_.push_back(ps);
 		}
