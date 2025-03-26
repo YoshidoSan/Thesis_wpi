@@ -1,0 +1,33 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "${default}",
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "includePath": [
+                "/usr/include/**",
+                "/usr/include/eigen3",
+                "/opt/ros/noetic/include/**",
+                "/home/kacper/Mgr/lot_auto_px4/devel/include/**",
+                "${workspaceFolder}",
+                "/home/kacper/Mgr/lot_auto_px4/src/asl_flight/include/**",
+                "/home/kacper/Mgr/lot_auto_px4/src/autonomous_flight/include/**",
+                "/home/kacper/Mgr/lot_auto_px4/src/global_planner/include/**",
+                "/home/kacper/Mgr/lot_auto_px4/src/map_manager/include/**",
+                "/home/kacper/Mgr/lot_auto_px4/src/onboard_detector/include/**",
+                "/home/kacper/Mgr/lot_auto_px4/src/time_optimizer/include/**",
+                "/home/kacper/Mgr/lot_auto_px4/src/tracking_controller/include/**",
+                "/home/kacper/Mgr/lot_auto_px4/src/trajectory_planner/include/**",
+                "/home/kacper/Mgr/lot_auto_px4/src/uav_simulator/include/**",
+                "/home/kacper/Mgr/lot_auto_px4/src/ccm_tracking_controller/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
+}
