@@ -129,6 +129,9 @@ include_directories(
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
   include/CCMtrackingController.cpp
+  include/CCM/ccmcontroller.cpp
+  include/CCM/Geodesic.cpp
+  include/CCM/ccmutils.cpp
 )
 
 ## Add cmake target dependencies of the library

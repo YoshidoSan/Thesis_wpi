@@ -10,6 +10,8 @@
 #include <Eigen/Sparse>
 #include <CCM/Geodesic.h>
 #include <CCM/Metric.h>
+#include <math.h>
+
 
 
 class CCMController {
@@ -21,11 +23,12 @@ private:
   bool active;
 
   // measured states
+  Eigen::Vector3d mea_vel;
   Eigen::Matrix3d mea_R;
   Eigen::Vector3d euler;
   Eigen::Vector3d mea_wb;
   Eigen::Vector3d mea_pos;
-  Eigen::Vector3d mea_vel;
+
   double fz;
 
   // CCM specific variables
@@ -45,9 +48,6 @@ private:
   Eigen::VectorXd _Xc_dot;
   double _M_yaw;
 
-  // use for integration
-  double dt;
-
   // config matrix
   Eigen::Matrix4d A;
 
@@ -63,6 +63,9 @@ private:
   Eigen::Vector3d euler_dot;
   Eigen::Vector3d r_wb;
   double fzCmd; // Thrust command
+
+  // use for integration
+  double dt;
 
   // constants
   double g;
@@ -85,7 +88,7 @@ private:
   void R_om(const Eigen::Vector3d &q, const Eigen::Vector3d &q_dot);
 
 public:
-  CCMController(const double N);
+  CCMController(const double N=2.0);
 
   // copy in updated state into controller class
   void updateState(const Eigen::Vector3d &r, const Eigen::Matrix3d &R,

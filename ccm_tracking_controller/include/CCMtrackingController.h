@@ -44,13 +44,13 @@ namespace ccmtracking{
 			ros::Timer visTimer_; // visualization timer
 
 			// parameters
-			double FZ_EST_N_;
-			double FZ_CTRL_N_;
+			double FZ_EST_N_; // rozmiar okna do estymacji siły ciągu (moving average)
+			double FZ_CTRL_N_; // Stała czasowa filtru pochodnej ciągu
 			bool verbose_;
 
 			// CCM
-			//std::shared_ptr<CCMController> ctrl_;
-			CCMController ctrl_;
+			std::unique_ptr<CCMController> ctrl_;
+			//CCMController ctrl_;
 
 			//recevied data
 			ccm_tracking_controller::CCMTarget target_;
@@ -74,8 +74,12 @@ namespace ccmtracking{
             Eigen::Vector3d vel_prev_;
 			Eigen::Vector3d euler_;
             double vel_prev_t_;
-            static Eigen::Matrix<double,3,3> Rz_T_;
-
+			// matrix
+            const Eigen::Matrix<double,3,3> Rz_T_= 
+			(Eigen::Matrix<double,3,3>() 
+			<< 0.0, 1.0, 0.0,
+			-1.0, 0.0, 0.0,
+			 0.0, 0.0, 1.0).finished();;
             // Thrust estimation MA
             double fz_est_raw_;
             double fz_est_;

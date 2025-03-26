@@ -1,5 +1,4 @@
 #include <CCM/Geodesic.h>
-#include <CCM/Metric.h>
 
 namespace geodesic {
 

@@ -1,7 +1,4 @@
 #include <CCM/ccmutils.h>
-#include <ros/ros.h>
-#include <math.h>
-#include <Eigen/Dense>
 
 void ccmutils::quat2rotM(const Eigen::Vector4d& q, Eigen::Matrix3d &R){
 

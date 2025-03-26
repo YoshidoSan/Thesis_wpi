@@ -3,12 +3,12 @@
 	---------------------------------
 	tracking controller for px4-based quadcopter
 */
-#include <ccm_tracking_controller/CCMtrackingController.h>
+#include <CCMtrackingController.h>
 
 int main(int argc, char** argv){
 	ros::init(argc, argv, "ccm_tracking_controller_node");
 	ros::NodeHandle nh;
-	controller::trackingController tc (nh);
+	ccmtracking::CCMtrackingController tc (nh);
 	ros::spin();
 
 	return 0;

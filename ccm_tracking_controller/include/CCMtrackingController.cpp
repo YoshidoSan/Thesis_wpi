@@ -1,5 +1,5 @@
 /*
-	FILE: trackingController.cpp
+	FILE: CCMtrackingController.cpp
 	-------------------------------
 	function implementation of px4 tracking controller
 */
@@ -9,14 +9,17 @@
 namespace ccmtracking{
 	CCMtrackingController::CCMtrackingController(const ros::NodeHandle& nh) : nh_(nh){
 		this->initParamModules();
+		//this->ctrl_ = CCMController(this->FZ_CTRL_N_);
+		//this->ctrl_ = (new CCMController(this->FZ_CTRL_N_));
 		this->registerPub();
 		this->registerCallback();
 	}
 
+
 	void CCMtrackingController::initParamModules(){
 		
 		// Define controller classes
-		if (not this->nh_.getParam("controller/FZ_EST_N", this->FZ_EST_N_)){
+		if (not this->nh_.getParam("ccm_controller/FZ_EST_N", this->FZ_EST_N_)){
 			this->FZ_EST_N_ = 1.0;
 			cout << "[CCMtrackingController]: FZ_EST_N use default: 1.0." << endl;
 		}
@@ -24,7 +27,7 @@ namespace ccmtracking{
 			cout << "[CCMtrackingController]: FZ_EST_N is set to: " << this->FZ_EST_N_  << endl;
 		}
 
-		if (not this->nh_.getParam("controller/FZ_CTRL_N", this->FZ_CTRL_N_)){
+		if (not this->nh_.getParam("ccm_controller/FZ_CTRL_N", this->FZ_CTRL_N_)){
 			this->FZ_CTRL_N_ = 1.0;
 			cout << "[CCMtrackingController]: FZ_EST_N use default: 1.0." << endl;
 		}
@@ -33,14 +36,10 @@ namespace ccmtracking{
 		}
 		//double N = this->FZ_CTRL_N_;
 		//this->ctrl_ = (new CCMController (N));
-		ctrl_(this->FZ_CTRL_N_);
+		
+		// ccmcontroller
+		this->ctrl_ = std::make_unique<CCMController>(this->FZ_CTRL_N_);
 
-
-		// init param
-		this->Rz_T_ =
-		(Eigen::Matrix<double,3,3>() << 0.0, 1.0, 0.0,
-									   -1.0, 0.0, 0.0,
-										0.0, 0.0, 1.0).finished();
 		// Estimator values
 		this->fz_est_ = 9.8066;
 		this->fz_est_sum_ = this->fz_est_ * this->FZ_EST_N_;
@@ -53,12 +52,12 @@ namespace ccmtracking{
 		this->vel_prev_.setZero();
 
 		// Display message
-		if (not this->nh_.getParam("controller/verbose", this->verbose_)){
+		if (not this->nh_.getParam("ccm_controller/verbose", this->verbose_)){
 			this->verbose_ = false;
-			cout << "[trackingController]: No display message param. Use default: false." << endl;
+			cout << "[CCMtrackingController]: No display message param. Use default: false." << endl;
 		}
 		else{
-			cout << "[trackingController]: Dsiplay message is set to: " << this->verbose_  << endl;
+			cout << "[CCMtrackingController]: Display message is set to: " << this->verbose_  << endl;
 		}
 	}
 
@@ -185,19 +184,19 @@ namespace ccmtracking{
 		Eigen::Vector4d cmd;
 
 		// update controller
-		this->ctrl_.updateState(this->mea_pos_, this->mea_R_, this->mea_vel_, this->mea_wb_, this->fz_est_, this->target_.dt, this->pose_up_, this->vel_up_);
+		this->ctrl_->updateState(this->mea_pos_, this->mea_R_, this->mea_vel_, this->mea_wb_, this->fz_est_, this->target_.dt, this->pose_up_, this->vel_up_);
 
 		// calculate ccm
-		this->ctrl_.calcCCM(this->target_.yaw, this->target_.yaw_dot, this->position_recevied_conv_, this->velocity_recevied_conv_, this->acceleration_recevied_conv_, this->jerk_recevied_conv);
+		this->ctrl_->calcCCM(this->target_.yaw, this->target_.yaw_dot, this->position_recevied_conv_, this->velocity_recevied_conv_, this->acceleration_recevied_conv_, this->jerk_recevied_conv);
 
 		// get commands
 		Eigen::Vector3d ref_er(0,0,0);
-		ref_er = this->ctrl_.getEr();
+		ref_er = this->ctrl_->getEr();
 
 		cmd(0) = ref_er(0);
 		cmd(1) = ref_er(1);
 		cmd(2) = ref_er(2);
-		cmd(3) = std::min(1.0, std::max(0.0, 0.56 * (this->ctrl_.getfz()) / 9.8066));
+		cmd(3) = std::min(1.0, std::max(0.0, 0.56 * (this->ctrl_->getfz()) / 9.8066));
 
 		// publish command
 		this->publishCommand(cmd);

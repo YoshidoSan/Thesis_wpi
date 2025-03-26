@@ -1,8 +1,4 @@
 #include <CCM/ccmcontroller.h>
-#include <Eigen/Dense>
-#include <math.h>
-#include <Metric.h>
-
 
 /********* Constructor ***********/
 CCMController::CCMController(const double N):
@@ -148,7 +144,7 @@ void CCMController::calc_xc_uc_nom(const Eigen::Vector3d &r_pos,
   _xc_nom(8) = std::asin(zb(0));
   _xc_nom(9) = std::atan2(-yb(0), xb(0));
 
-  double om_x, om_y, om_z = 0.0;
+  double om_x =0.0, om_y=0.0, om_z = 0.0;
 
   if (_xc_nom(6) > 0.0) {
     om_x =  (1.0/_xc_nom(6)) * ( r_jer.dot(yb) );
@@ -182,7 +178,7 @@ void CCMController::calc_CCM_dyn(const Eigen::VectorXd &xc,const Eigen::Vector4d
 
   double r = xc(7);
   double p = xc(8);
-  double y = xc(9);
+  //double y = xc(9); //unused
 
   Eigen::Vector3d b_T(sin(p), -cos(p)*sin(r), cos(p)*cos(r));
 
@@ -273,23 +269,6 @@ void CCMController::calcCCM(const double yaw_des, const double yaw_dot_des, cons
 
     // Manual yaw_rate fb
     // uc_fb(3) = 2.8 * (_xc_nom(9) - _xc(9));
-
-    // Debug controller comp
-
-    /*
-    ROS_INFO("xc_nom:%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f",
-             _xc_nom(0),_xc_nom(1),_xc_nom(2),
-             _xc_nom(3),_xc_nom(4),_xc_nom(5),
-             _xc_nom(6),_xc_nom(7),_xc_nom(8),
-             _xc_nom(9));
-    ROS_INFO("xc:%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f",
-              _xc(0),_xc(1),_xc(2),
-              _xc(3),_xc(4),_xc(5),
-              _xc(6),_xc(7),_xc(8),
-              _xc(9));
-    ROS_INFO("E:%.3f, uc_fb:(%.3f,%.3f,%.3f,%.3f)",E,uc_fb(0),uc_fb(1),uc_fb(2),uc_fb(3));
-    ROS_INFO("E:%.3f, uc:(%.3f,%.3f,%.3f,%.3f)",E,uc_fb(0)+_uc_nom(0),uc_fb(1)+_uc_nom(1),uc_fb(2)+_uc_nom(2),uc_fb(3)+_uc_nom(3));
-    */
 
     // Update fz_dot
     fz_dot_sum += _uc_nom(0)+uc_fb(0) - (fz_dot_sum/filter_N);

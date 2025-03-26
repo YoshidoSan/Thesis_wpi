@@ -54,13 +54,13 @@ void poseSubCB(const geometry_msgs::PoseStamped::ConstPtr& msg) {
   mea_q(3) = msg->pose.orientation.z;
 
   // Convert to Matrix
-  utils::quat2rotM(mea_q, mea_R);
+  ccmutils::quat2rotM(mea_q, mea_R);
 
   // Adjust by R_z
   mea_R = mea_R * Rz_T;
 
   // Extract ENU encoding of PX4 quat
-  utils::rotM2quat(mea_q, mea_R);
+  ccmutils::rotM2quat(mea_q, mea_R);
 
   // Convert to NED
   double q_w = mea_q(0);
@@ -71,7 +71,7 @@ void poseSubCB(const geometry_msgs::PoseStamped::ConstPtr& msg) {
   mea_q << q_w, q_x, q_y, q_z;
 
   // Final conversion to rot matrix
-  utils::quat2rotM(mea_q, mea_R);
+  ccmutils::quat2rotM(mea_q, mea_R);
 
   pose_up = 1;
 

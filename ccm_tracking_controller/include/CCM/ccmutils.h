@@ -2,6 +2,8 @@
 #define CCM_UTILS_H
 
 #include <Eigen/Dense>
+#include <ros/ros.h>
+#include <math.h>
 
 namespace ccmutils
 {
